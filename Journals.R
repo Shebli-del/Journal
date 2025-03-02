@@ -15,7 +15,7 @@
 `Journal_Citation_Indicator-Clarivate`,	`Total_Citations_(2023`,
 
 # Load packages -----------------------------------------------------------
-
+library(writexl)
 library(readxl)
 library(dplyr)
 library(gtsummary)
@@ -43,7 +43,7 @@ library(RColorBrewer)
 
 # Load the data -----------------------------------------------------------
 
-Jour <- read_excel("~/Desktop/AbdallahMeera/2025/Journals/02_02_2025.xlsx")
+Jour <- read_excel("Copy of 2_27_25_results.xlsx")
 
 Jour$`Original_article_cost_($)` <- as.numeric(Jour$`Original_article_cost_($)`)
 Jour$`Cost_Review_of_article_($)`<- as.numeric(Jour$`Cost_Review_of_article_($)`)
@@ -75,8 +75,8 @@ JourInd <- Jour %>%
 
 # Summary -----------------------------------------------------------------
 
-
-Jour %>%
+#remove Joe1 in case wanted excel manually
+Joe1<- Jour %>%
   select(`Country`,
          `Region/Continent_`,	`H-Index_`, `Original_article_cost_($)`, 
          `Cost_Review_of_article_($)`,  `Cost_editoria_($)`,
@@ -98,10 +98,12 @@ Jour %>%
   ) %>%
   modify_caption("**Table X. Summary of all data**")
 
+Joe1 %>% 
+  as_hux_xlsx("Joe1.xlsx")
 
 # By IF_X_Publication --------------------------------------------------------
 
-JourInd %>%
+Joe2 <- JourInd %>%
   select(`H-Index_`, `Original_article_cost_($)`, 
          `Cost_Review_of_article_($)`,  `Cost_editoria_($)`,
          `Cost_Letter_to_editors_($)`, 
@@ -138,10 +140,12 @@ JourInd %>%
   ) %>%
   modify_caption("**Table X. Summary of cost by publication model and index factor**")
 
+Joe2 %>% 
+  as_hux_xlsx("Joe2.xlsx")
 
 # By Impact factor only ---------------------------------------------------
 
-Jour %>%
+Joe3 <- Jour %>%
   select(`H-Index_`, `Original_article_cost_($)`, 
          `Cost_Review_of_article_($)`,  `Cost_editoria_($)`,
          `Cost_of_Guidelines__($)`, `Cost_Letter_to_editors_($)`, 
@@ -165,10 +169,12 @@ Jour %>%
   add_q() %>%
   modify_caption("**Table X. Summary of all data by Impact_Factor-Clarivate**")
 
+Joe3 %>% 
+  as_hux_xlsx("Joe3.xlsx")
 
 # By region ---------------------------------------------------------------
 
-Jour %>%
+Joe4 <- Jour %>%
   select(`H-Index_`, `Original_article_cost_($)`, `Region/Continent_`,
          `Cost_Review_of_article_($)`,  `Cost_editoria_($)`,
          `Cost_of_Guidelines__($)`, `Cost_Letter_to_editors_($)`, 
@@ -192,6 +198,8 @@ Jour %>%
   add_q() %>%
   modify_caption("**Table X. Summary of all data by Impact_Factor-Clarivate**")
 
+Joe4 %>% 
+  as_hux_xlsx("Joe4.xlsx")
 
 # Maps --------------------------------------------------------------------
 
@@ -322,7 +330,7 @@ map2Im <- map1Im +
   )+
   theme(legend.text = element_text(size=15))+ 
   theme(plot.title = element_text(size = 40, face = "bold"))+
-  ggtitle("Countries by journals impace_Clarivate")
+  ggtitle("Countries by median impact_Clarivate")
 
 map2Im
 
@@ -425,6 +433,10 @@ Jour %>%
   count(Index5) %>% 
   mutate(precent = n / sum(n) *100)
 
+
+# Or use `as_hux_xlsx()`
+Immap %>% 
+  as_hux_xlsx("example_gtsummary2.xlsx")
 
 # End ---------------------------------------------------------------------
 
