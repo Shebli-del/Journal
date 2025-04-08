@@ -53,8 +53,11 @@ Jour$`Cost_Letter_to_editors_($)`<- as.numeric(Jour$`Cost_Letter_to_editors_($)`
 Jour$`Cost_case_series__($)`<- as.numeric(Jour$`Cost_case_series__($)`)
 Jour$`Cost_of_comments_($)`<- as.numeric(Jour$`Cost_of_comments_($)`)
 Jour$`Impact_Factor-Clarivate` <- as.numeric(Jour$`Impact_Factor-Clarivate`)
+Jour$`Impact_Factor-Clarivate`[is.na(Jour$`Impact_Factor-Clarivate`)] <- 0
 Jour$`Journal_Citation_Indicator-Clarivate` <- as.numeric(Jour$`Journal_Citation_Indicator-Clarivate`)
+Jour$`Journal_Citation_Indicator-Clarivate`[is.na(Jour$`Journal_Citation_Indicator-Clarivate`)] <- 0
 Jour$`Total_Citations_(2023` <- as.numeric(Jour$`Total_Citations_(2023`)
+Jour$`Total_Citations_(2023`[is.na(Jour$`Total_Citations_(2023`)] <- 0
 Jour$`Open_Access_(Y/N)` <- toupper(Jour$`Open_Access_(Y/N)`)
 
 Jour$Index5 <- cut(Jour$`Impact_Factor-Clarivate`, 
@@ -256,8 +259,16 @@ map2 <- map1 +
   theme(plot.title = element_text(size = 40, face = "bold"))+
   ggtitle("Countries by Journal counts")
 
-map2
 
+png(file = "Countries by Journal counts.png",   # The directory you want to save the file in
+    width = 25000, # The width of the plot in inches
+    height = 20000,
+    res       = 2200,
+    pointsize = 2) 
+# Step 2: Create the plot with R code
+map2
+# Step 3: Run dev.off() to create the file!
+dev.off()
 
 # Impact_Map --------------------------------------------------------------
 
@@ -335,6 +346,16 @@ map2Im <- map1Im +
 map2Im
 
 #write.csv(world_map,"~/Downloads/filename.csv", row.names = FALSE)
+
+png(file = "Countries by median impact_Clarivate.png",   # The directory you want to save the file in
+    width = 25000, # The width of the plot in inches
+    height = 20000,
+    res       = 2200,
+    pointsize = 2) 
+# Step 2: Create the plot with R code
+map2Im
+# Step 3: Run dev.off() to create the file!
+dev.off()
 
 
 # Cost Map ----------------------------------------------------------------
@@ -414,9 +435,20 @@ original articles", low="yellow", high= "darkgreen",
   )+
   theme(legend.text = element_text(size=15))+ 
   theme(plot.title = element_text(size = 30, face = "bold"))+
-  ggtitle("Countries by costs of publication in a peer reviewed journal")
+  ggtitle("Countries by costs of publication in a\n peer reviewed journal")
 
+
+
+png(file = "Countries by costs of publication in a peer reviewed journal.png",   # The directory you want to save the file in
+    width = 25000, # The width of the plot in inches
+    height = 20000,
+    res       = 2200,
+    pointsize = 2) 
+# Step 2: Create the plot with R code
 map2COST
+# Step 3: Run dev.off() to create the file!
+dev.off()
+
 
 # Other codes -------------------------------------------------------------
 
@@ -426,7 +458,7 @@ as.matrix(prop.table(table(Jour$`Region/Continent`)))
 fisher.test(as.matrix(table(Jour$`Region/Continent`)))
 
 Jour %>% 
-  count(`Region/Continent`) %>% 
+  count(`Region/Continent_`) %>% 
   mutate(precent = n / sum(n) *100)
 
 Jour %>% 
@@ -440,4 +472,4 @@ Immap %>%
 
 # End ---------------------------------------------------------------------
 
-
+Jour$`Region/Continent_`
