@@ -1,18 +1,3 @@
-# Variables ---------------------------------------------------------------
-
-`Title`,	`Publisher_`,	`Coverage_(years_(y-y)_`,
-`Categories_(Oncology,Hematology,_medicne,_etc)_`,	`Country`,
-`Region/Continent_`,	`H-Index_`,	`Original_articles_(Y/N)`,	`Cost_(currency)`,
-`Cost_($)`,	`Original_article_cost_($)`,	`Review_articles_(Y/N)`,	`Cost_(currency)`,
-`Cost_($)`,	`Cost_Review_of_article_($)`,	`Perspective_articles_(Y/N)`,	`Cost_(currency)`,
-`Cost_($)`,	`Editorial`,	`Cost_(currency)`,	`Cost_($)`,	`Cost_editoria_($)`,
-`Guidelines_articles_(Y/N)_`,	`Cost_(currency)`,	`Cost_($)`,	`Cost_of_Guidelines__($)`,
-`Letteras_to_Editors_(Y/N)_`,	`Cost_(currency)`,	`Cost_($)`,	`Cost_Letter_to_editors_($)`,
-`Case_reports_(Y/N)`,	`Cost_(currency)`,	`Cost_($)`,	`Cost_case_reports_($)`,	`Case_series_(Y/N)_`,
-`Cost_(currency)`,	`Cost_($)`,	`Cost_case_series__($)`,	`Comments_(Y/N)_`,	`Cost_(currency)`,
-`Cost_($)`,	`Cost_of_comments_($)`,	`Open_Access_(Y/N)`,	`Publishing_Model`,	`Has_APC_>0?_`,	
-`Requires_APC_to_publish_your_paper?_`,	`Notes`,	`Impact_Factor-Clarivate`,
-`Journal_Citation_Indicator-Clarivate`,	`Total_Citations_(2023`,
 
 # Load packages -----------------------------------------------------------
 library(writexl)
@@ -39,6 +24,7 @@ library(viridis)
 library(sf)
 library(tmap)
 library(RColorBrewer)
+library(sensemakr)
 
 
 # Load the data -----------------------------------------------------------
@@ -467,9 +453,100 @@ Jour %>%
 
 
 # Or use `as_hux_xlsx()`
-Immap %>% 
-  as_hux_xlsx("example_gtsummary2.xlsx")
+Immap 
+write.csv(Immap,"ByCournty_IF.xlsx", row.names = T)
 
-# End ---------------------------------------------------------------------
 
-Jour$`Region/Continent_`
+# Sensitivity analysis ----------------------------------------------------
+Jour$impact <- Jour$`Impact_Factor-Clarivate`
+Jour$open <- Jour$`Open_Access_(Y/N)`
+model123 <- lm(`Original_article_cost_($)` ~ open + impact +
+                  `Region/Continent_` ,
+             data=Jour)
+summary(model123)
+modelsen <- sensemakr(model= model123,
+                      treatment ="impact",
+                      benchmark_covariates = "openY")
+
+summary(modelsen)
+
+png(file = "Figure X. Sensitivity of the “Impact factor on article cost” 
+    association to unobserved confounding.png",   # The directory you want to save the file in
+    width = 2500, # The width of the plot in inches
+    height = 2000,
+    res       = 1200,
+    pointsize = 2) 
+# Step 2: Create the plot with R code
+plot(modelsen)
+# Step 3: Run dev.off() to create the file!
+dev.off()
+
+ovb_minimal_reporting(modelsen, format= "latex")
+
+ # End ---------------------------------------------------------------------
+
+Jour2 <- read_excel("data_10.19.25 copy.xlsx")
+Jour2$World_bank_classification <- Jour2$World_bank_classification %>% 
+  gsub("lower_middle_income", ".lower_middle_income", .) %>% 
+  gsub("upper_middle_income", ".upper_middle_income", .)
+
+#names(Jour2)
+Jour2$original_article_cost_USD <- as.numeric(
+  Jour2$original_article_cost_USD
+)
+Jour2$IF_JCR <- as.numeric(
+  Jour2$IF_JCR
+)
+
+Jour2$JCI_JCR <- as.numeric(
+  Jour2$JCI_JCR
+)
+
+Jour2$TCs_JCR <- as.numeric(
+  Jour2$TCs_JCR
+)
+
+Jour2$CiteScore <- as.numeric(
+  Jour2$CiteScore
+)
+
+Jour2[,c("IF_JCR","JCI_JCR","TCs_JCR","CiteScore", "original_article_cost_USD" )] <- 
+  Jour2[,c("IF_JCR","JCI_JCR","TCs_JCR","CiteScore","original_article_cost_USD" )] %>%
+  mutate_if(is.character, as.numeric)
+
+Jour2 %>%
+  select(`original_article_cost_USD`, `World_bank_classification` ,
+      `IF_JCR`, `JCI_JCR`, `TCs_JCR`, CiteScore
+  ) %>%
+  tbl_summary(
+    label =  list ( IF_JCR ~ "Impact_Factor_Index"
+    ),
+    percent ="column",
+    digits =list (),
+    statistic = list (
+      all_continuous() ~ "{mean} (range: {min} to {max})"
+    ), 
+    type = list( )
+  ) %>%
+  modify_caption("**Table X. Summary of all data**") %>% 
+  as_hux_xlsx("Summary of data by cose and income with IF.xlsx")
+
+Jour2 %>%
+  select(`original_article_cost_USD`, `World_bank_classification` ,
+         `IF_JCR`, `JCI_JCR`, `TCs_JCR`, CiteScore
+  ) %>%
+  tbl_summary(
+    by= `World_bank_classification`,
+    label =  list ( 
+    ),
+    percent ="column",
+    digits =list (),
+    statistic = list (
+      all_continuous() ~ "{mean} (range: {min} to {max})"
+    ), 
+    type = list( )
+  ) %>%
+  add_p()%>%
+  add_q() %>%
+  modify_caption("**Impact factor and cost by World_bank_classification**") %>%
+  as_hux_xlsx("by World_bank_classification.xlsx")
