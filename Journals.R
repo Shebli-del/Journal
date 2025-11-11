@@ -485,6 +485,10 @@ ovb_minimal_reporting(modelsen, format= "latex")
 
  # End ---------------------------------------------------------------------
 
+
+# Extras ------------------------------------------------------------------
+
+
 Jour2 <- read_excel("data_10.19.25 copy.xlsx")
 Jour2$World_bank_classification <- Jour2$World_bank_classification %>% 
   gsub("lower_middle_income", ".lower_middle_income", .) %>% 
@@ -550,3 +554,128 @@ Jour2 %>%
   add_q() %>%
   modify_caption("**Impact factor and cost by World_bank_classification**") %>%
   as_hux_xlsx("by World_bank_classification.xlsx")
+
+
+# NeuImpact_Map --------------------------------------------------------------
+Jour2$Country <- Jour2$`country: use print ISSN if possible`
+Jour2 %>%
+  select(		`Country`,`IF_JCR`, 
+  ) %>%
+  tbl_summary(
+    by= 	`Country`,
+    label =  list ( 
+    ),
+    percent = "column" ,
+    digits =list (),
+    statistic = list (), 
+    type = list()
+  )  -> Immap_n
+
+Immap_n <- as.data.frame(Immap_n)
+Immap_n <- t(Immap_n)
+Immap_n <- as.data.frame(Immap_n)
+row.names(Immap_n)
+d_n <- Immap_n
+names_n <- rownames(d_n)
+names_n <- gsub("\\*\\*", "", names_n)
+names_n <- gsub(" ", "", names_n)
+rownames(d_n) <- NULL
+Immap2_n <- cbind(names_n,d_n)
+Immap2_n <- separate(Immap2_n,"names_n", sep = "\n", into = c("region","na","na2"))
+Immap2_n <- Immap2_n[-c(1),]
+Immap2_n <- separate(Immap2_n,"V1", sep = " ", into = c("count","na2"))
+Immap2_n <- Immap2_n[,-c(2,4,5)]
+names(Immap2_n) <- c("region", "count")
+ImmapF_n <- Immap2_n
+ImmapF_n
+#nc <- st_read(system.file("shape/nc.shp", package="sf")) 
+#plot(nc["AREA"], main = "AREA", breaks = "quantile", 
+#     nbreaks = 9, pal = brewer.pal(9, "YlOrRd"))
+ImmapF_n$region <- gsub("russia", "Russia", ImmapF_n$region)
+ImmapF_n$region <- gsub("australia", "Australia", ImmapF_n$region)
+ImmapF_n$region <- gsub("austria", "Austria", ImmapF_n$region)
+ImmapF_n$region <- gsub("belarus", "Belarus", ImmapF_n$region)
+ImmapF_n$region <- gsub("belgium", "Belgium", ImmapF_n$region)
+ImmapF_n$region <- gsub("brazil", "Brazil", ImmapF_n$region)
+ImmapF_n$region <- gsub("canada", "Canada", ImmapF_n$region)
+ImmapF_n$region <- gsub("china", "China", ImmapF_n$region)
+ImmapF_n$region <- gsub("croatia", "Croatia", ImmapF_n$region)
+ImmapF_n$region <- gsub("cuba", "Cuba", ImmapF_n$region)
+ImmapF_n$region <- gsub("egypt", "Egypt", ImmapF_n$region)
+ImmapF_n$region <- gsub("france", "France", ImmapF_n$region)
+ImmapF_n$region <- gsub("germany", "Germany", ImmapF_n$region)
+ImmapF_n$region <- gsub("greece", "Greece", ImmapF_n$region)
+ImmapF_n$region <- gsub("hong_kong", "China", ImmapF_n$region)
+ImmapF_n$region <- gsub("hungary", "Hungary", ImmapF_n$region)
+ImmapF_n$region <- gsub("india", "India", ImmapF_n$region)
+ImmapF_n$region <- gsub("indonesia", "Indonesia", ImmapF_n$region)
+ImmapF_n$region <- gsub("iran", "Iran", ImmapF_n$region)
+ImmapF_n$region <- gsub("ireland", "Ireland", ImmapF_n$region)
+ImmapF_n$region <- gsub("italy", "Italy", ImmapF_n$region)
+ImmapF_n$region <- gsub("japan", "Japan", ImmapF_n$region)
+ImmapF_n$region <- gsub("mexico", "Mexico", ImmapF_n$region)
+ImmapF_n$region <- gsub("netherlands", "Netherlands", ImmapF_n$region)
+ImmapF_n$region <- gsub("poland", "Poland", ImmapF_n$region)
+ImmapF_n$region <- gsub("republic_of_korea", "South Korea", ImmapF_n$region)
+ImmapF_n$region <- gsub("romania", "Romania", ImmapF_n$region)
+ImmapF_n$region <- gsub("serbia", "Serbia", ImmapF_n$region)
+ImmapF_n$region <- gsub("singapore", "Singapore", ImmapF_n$region)
+ImmapF_n$region <- gsub("slovakia", "Slovakia", ImmapF_n$region)
+ImmapF_n$region <- gsub("slovenia", "Slovenia", ImmapF_n$region)
+ImmapF_n$region <- gsub("spain", "Spain", ImmapF_n$region)
+ImmapF_n$region <- gsub("sweden", "Sweden", ImmapF_n$region)
+ImmapF_n$region <- gsub("japan", "Japan", ImmapF_n$region)
+ImmapF_n$region <- gsub("united_kingdom", "UK", ImmapF_n$region)
+ImmapF_n$region <- gsub("new_zealand", "New Zealand", ImmapF_n$region)
+ImmapF_n$region <- gsub("switzlerland", "Switzerland", ImmapF_n$region)
+ImmapF_n$region <- gsub("switzerland", "Switzerland", ImmapF_n$region)
+ImmapF_n$region <- gsub("turkey", "Turkey", ImmapF_n$region)
+ImmapF_n$region <- gsub("united_kingdom", "UK", ImmapF_n$region)
+ImmapF_n$region <- gsub("ukraine", "Ukraine", ImmapF_n$region)
+ImmapF_n$region <- gsub("united_states", "USA", ImmapF_n$region)
+ImmapF_n$region <- gsub("venezuela", "Venezuela", ImmapF_n$region)
+ImmapF_n$region <- gsub("czechia", "Czech Republic", ImmapF_n$region)
+
+ImmapF_n
+world_map <- map_data("world") 
+table(world_map$region)
+mapdataIM <- left_join(world_map,ImmapF_n, by="region" )
+mapdataIM$count <- as.numeric(mapdataIM$count)
+
+#mapdata1 <- mapdataIM%>%
+#  filter(!is.na(mapdataIM$count))
+
+map1Im <- ggplot(mapdataIM, aes(long, lat, group = group)) +  
+  geom_polygon(aes(fill = count ) )
+map2Im <- map1Im + 
+  scale_fill_gradient(name= "Imapct of
+  Journals_
+  Clarivate", low="yellow", high= "darkgreen",
+                      na.value= "gray50") +
+  theme ( axis.text.x= element_blank(),
+          axis.text.y= element_blank(),
+          axis.ticks = element_blank(),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          rect = element_blank(),
+          text = element_text(size=rel(0.5))
+  ) +
+  theme(legend.key.size = unit(2, "cm")
+  )+
+  theme(legend.text = element_text(size=15))+ 
+  theme(plot.title = element_text(size = 40, face = "bold"))+
+  ggtitle("Countries by median impact_Clarivate")
+
+map2Im
+
+#write.csv(world_map,"~/Downloads/filename.csv", row.names = FALSE)
+
+png(file = "Countries by median impact_Clarivate.png",   # The directory you want to save the file in
+    width = 25000, # The width of the plot in inches
+    height = 20000,
+    res       = 2200,
+    pointsize = 2) 
+# Step 2: Create the plot with R code
+map2Im
+# Step 3: Run dev.off() to create the file!
+dev.off()
