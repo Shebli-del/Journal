@@ -483,13 +483,13 @@ dev.off()
 
 ovb_minimal_reporting(modelsen, format= "latex")
 
- # End ---------------------------------------------------------------------
+# End ---------------------------------------------------------------------
 
 
 # Extras ------------------------------------------------------------------
 
 
-Jour2 <- read_excel("data_10.19.25 copy.xlsx")
+Jour2 <- read_excel("data_10.19.25.xlsx")
 Jour2$World_bank_classification <- Jour2$World_bank_classification %>% 
   gsub("lower_middle_income", ".lower_middle_income", .) %>% 
   gsub("upper_middle_income", ".upper_middle_income", .)
@@ -518,7 +518,7 @@ Jour2[,c("IF_JCR","JCI_JCR","TCs_JCR","CiteScore", "original_article_cost_USD" )
   Jour2[,c("IF_JCR","JCI_JCR","TCs_JCR","CiteScore","original_article_cost_USD" )] %>%
   mutate_if(is.character, as.numeric)
 
-Jour2 %>%
+Jour2[-1,] %>%
   select(`original_article_cost_USD`, `World_bank_classification` ,
       `IF_JCR`, `JCI_JCR`, `TCs_JCR`, CiteScore
   ) %>%
@@ -528,14 +528,13 @@ Jour2 %>%
     percent ="column",
     digits =list (),
     statistic = list (
-      all_continuous() ~ "{mean} (range: {min} to {max})"
     ), 
     type = list( )
   ) %>%
   modify_caption("**Table X. Summary of all data**") %>% 
   as_hux_xlsx("Summary of data by cose and income with IF.xlsx")
 
-Jour2 %>%
+Jour2[-1,] %>%
   select(`original_article_cost_USD`, `World_bank_classification` ,
          `IF_JCR`, `JCI_JCR`, `TCs_JCR`, CiteScore
   ) %>%
@@ -546,7 +545,6 @@ Jour2 %>%
     percent ="column",
     digits =list (),
     statistic = list (
-      all_continuous() ~ "{mean} (range: {min} to {max})"
     ), 
     type = list( )
   ) %>%
@@ -558,6 +556,7 @@ Jour2 %>%
 
 # NeuImpact_Map --------------------------------------------------------------
 Jour2$Country <- Jour2$`country: use print ISSN if possible`
+Jour2$IF_JCR <- as.numeric(Jour2$IF_JCR)
 Jour2 %>%
   select(		`Country`,`IF_JCR`, 
   ) %>%
@@ -658,24 +657,73 @@ map2Im <- map1Im +
           axis.title.x = element_blank(),
           axis.title.y = element_blank(),
           rect = element_blank(),
-          text = element_text(size=rel(0.5))
+          text = element_text(size=rel(0.1))
   ) +
   theme(legend.key.size = unit(2, "cm")
   )+
   theme(legend.text = element_text(size=15))+ 
-  theme(plot.title = element_text(size = 40, face = "bold"))+
+  theme(plot.title = element_text(size = 30, face = "bold"))+
   ggtitle("Countries by median impact_Clarivate")
 
 map2Im
 
 #write.csv(world_map,"~/Downloads/filename.csv", row.names = FALSE)
 
-png(file = "Countries by median impact_Clarivate.png",   # The directory you want to save the file in
-    width = 25000, # The width of the plot in inches
-    height = 20000,
-    res       = 2200,
+png(file = "Countries by median impact_Clarivate2.png",   # The directory you want to save the file in
+    width = 2550, # The width of the plot in inches
+    height = 2000,
+    res       = 220,
     pointsize = 2) 
 # Step 2: Create the plot with R code
 map2Im
 # Step 3: Run dev.off() to create the file!
 dev.off()
+
+# By region_ NEW ---------------------------------------------------------------
+
+Jour2$JCI_JCR <- as.numeric(Jour2$JCI_JCR )
+Jour2$TCs_JCR <- as.numeric(Jour2$TCs_JCR )
+Jour2$original_article_cost_USD <- as.numeric(Jour2$original_article_cost_USD )
+Jour3 <- Jour2[-1,]
+
+Jour3 %>%
+  select(`IF_JCR`, JCI_JCR, , TCs_JCR, 
+         `original_article_cost_USD`, `Region_EC`
+  ) %>%
+  tbl_summary(
+    by= Region_EC,
+    label =  list ( 
+    ),
+    percent ="column",
+    digits =list (),
+    statistic = list (
+    ), 
+    type = list( )
+  ) %>%
+  add_p()%>%
+  add_q() %>%
+  modify_caption("**Summary of all data by Impact_Factor**") %>% 
+  as_hux_xlsx("Impact factor and cost by region.xlsx")
+
+
+all_continuous() ~ "{mean} (range: {min} to {max})"
+
+Jour3 %>%
+  select(`IF_JCR`, JCI_JCR, , TCs_JCR, 
+         `original_article_cost_USD`, `Region_EC`
+  ) %>%
+  tbl_summary(
+    by= Region_EC,
+    label =  list ( 
+    ),
+    percent ="column",
+    digits =list (),
+    statistic = list (
+      all_continuous() ~ "{mean} (range: {min} to {max})"
+    ), 
+    type = list( )
+  ) %>%
+  add_p()%>%
+  add_q() %>%
+  modify_caption("**Summary of all data by Impact_Factor**") %>% 
+  as_hux_xlsx("Impact factor and cost by region (using means).xlsx")
