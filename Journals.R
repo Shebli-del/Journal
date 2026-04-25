@@ -312,7 +312,7 @@ map1Im <- ggplot(mapdataIM, aes(long, lat, group = group)) +
   geom_polygon(aes(fill = count ) )
 map2Im <- map1Im + 
   scale_fill_gradient(name= "Imapct of
-  Journals_
+  Journals 
   Clarivate", low="yellow", high= "darkgreen",
                       na.value= "gray50") +
   theme ( axis.text.x= element_blank(),
@@ -321,28 +321,30 @@ map2Im <- map1Im +
           axis.title.x = element_blank(),
           axis.title.y = element_blank(),
           rect = element_blank(),
-          text = element_text(size=rel(3.5))
+          text = element_text(size=rel(2))
   ) +
   theme(legend.key.size = unit(2, "cm")
   )+
-  theme(legend.text = element_text(size=15))+ 
-  theme(plot.title = element_text(size = 40, face = "bold"))+
-  ggtitle("Countries by median impact_Clarivate")
+  theme(legend.text = element_text(size=5))+ 
+  theme(plot.title = element_text(size = 15, face = "bold"))+
+  ggtitle("Countries by median impact Clarivate")
 
 map2Im
 
 #write.csv(world_map,"~/Downloads/filename.csv", row.names = FALSE)
 
-png(file = "Countries by median impact_Clarivate.png",   # The directory you want to save the file in
-    width = 25000, # The width of the plot in inches
-    height = 20000,
-    res       = 2200,
-    pointsize = 2) 
+#png(file = "Countries by median impact_Clarivate.png",   # The directory you want to save the file in
+#    width = 25000, # The width of the plot in inches
+#    height = 20000,
+#    res       = 2200,
+#    pointsize = 2) 
 # Step 2: Create the plot with R code
-map2Im
+#map2Im
 # Step 3: Run dev.off() to create the file!
-dev.off()
+#dev.off()
 
+ggsave(filename = "my_plot.svg", plot = map2Im,
+       width = 10, height = 8, units = "in")
 
 # Cost Map ----------------------------------------------------------------
 
@@ -489,7 +491,7 @@ ovb_minimal_reporting(modelsen, format= "latex")
 # Extras ------------------------------------------------------------------
 
 
-Jour2 <- read_excel("data_10.19.25.xlsx")
+Jour2 <- read_excel("data_10.19.25 copy 2.xlsx")
 Jour2$World_bank_classification <- Jour2$World_bank_classification %>% 
   gsub("lower_middle_income", ".lower_middle_income", .) %>% 
   gsub("upper_middle_income", ".upper_middle_income", .)
@@ -552,6 +554,27 @@ Jour2[-1,] %>%
   add_q() %>%
   modify_caption("**Impact factor and cost by World_bank_classification**") %>%
   as_hux_xlsx("by World_bank_classification.xlsx")
+
+Jour2[-1,] %>%
+  select(`original_article_cost_USD`, `World_bank_classification` ,
+         `IF_JCR`, `JCI_JCR`, `TCs_JCR`, CiteScore
+  ) %>%
+  tbl_summary(
+    by= `World_bank_classification`,
+    label =  list ( 
+    ),
+    percent ="column",
+    digits =list (),
+    statistic = list (
+      all_continuous() ~ "{mean} (range: {min} to {max})"
+    ), 
+    type = list( )
+  ) %>%
+  add_p()%>%
+  add_q() %>%
+  modify_caption("**Impact factor and cost by World_bank_classification**") %>%
+  as_hux_xlsx("by World_bank_classification_mean.xlsx")
+
 
 
 # NeuImpact_Map --------------------------------------------------------------
@@ -657,27 +680,29 @@ map2Im <- map1Im +
           axis.title.x = element_blank(),
           axis.title.y = element_blank(),
           rect = element_blank(),
-          text = element_text(size=rel(0.1))
+          text = element_text(size=rel(2))
   ) +
   theme(legend.key.size = unit(2, "cm")
   )+
   theme(legend.text = element_text(size=15))+ 
   theme(plot.title = element_text(size = 30, face = "bold"))+
-  ggtitle("Countries by median impact_Clarivate")
+  ggtitle("Countries by median impact Clarivate")
 
 map2Im
 
 #write.csv(world_map,"~/Downloads/filename.csv", row.names = FALSE)
 
-png(file = "Countries by median impact_Clarivate2.png",   # The directory you want to save the file in
-    width = 2550, # The width of the plot in inches
-    height = 2000,
-    res       = 220,
+pdf(file = "Figure_OA-25-00145R2.pdf",   # The directory you want to save the file in
+    width = 28, # The width of the plot in inches
+    height = 20,
     pointsize = 2) 
 # Step 2: Create the plot with R code
 map2Im
 # Step 3: Run dev.off() to create the file!
 dev.off()
+
+ggsave(filename = "my_plot2.svg", plot = map2Im,
+       width = 10, height = 8, units = "in")
 
 # By region_ NEW ---------------------------------------------------------------
 
@@ -705,8 +730,6 @@ Jour3 %>%
   modify_caption("**Summary of all data by Impact_Factor**") %>% 
   as_hux_xlsx("Impact factor and cost by region.xlsx")
 
-
-all_continuous() ~ "{mean} (range: {min} to {max})"
 
 Jour3 %>%
   select(`IF_JCR`, JCI_JCR, , TCs_JCR, 
